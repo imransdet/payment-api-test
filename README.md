@@ -66,12 +66,15 @@ tests/
 │   └── fetch.spec.ts         GET  /payments/{id}
 ├── e2e/
 │   └── payment-flow.spec.ts  cross-endpoint lifecycle flows
-├── diagnostics/
-│   ├── smoke.spec.ts         basic reachability check
-│   └── timing.spec.ts        measures settle-time stats (async handling, below)
-└── discovery/
-    └── *.spec.ts             throwaway response recordings, no assertions
+└── exploratory/
+    ├── discovery*.spec.ts    throwaway response recordings, no assertions
+    ├── smoke.spec.ts         basic reachability check
+    └── timing.spec.ts        measures settle-time stats (async handling, below)
 ```
+
+`tests/exploratory/` is excluded from the default run via `testIgnore` in
+`playwright.config.ts` — these are ad-hoc scripts kept for reference, not part
+of the endpoint coverage described below.
 
 One spec file per endpoint, plus an end-to-end file for behaviour that spans
 several. Within each spec, tests are grouped by intent — happy path, settled
@@ -99,7 +102,7 @@ representation, so the full response schema is not observable until a resource
 settles. Writing assertions from the spec alone would have missed both defects
 and produced tests that pass against the wrong representation.
 
-The discovery specs are retained under `tests/discovery/` for reference. They
+The discovery specs are retained under `tests/exploratory/` for reference. They
 contain no assertions and are excluded from the default run.
 
 ### Async handling
