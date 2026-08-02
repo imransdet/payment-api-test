@@ -1,4 +1,4 @@
-import { test } from './fixtures/api.fixture';
+import { test } from '../fixtures/api.fixture';
 
 const CARD_OK = '4111111111111111';
 const CARD_DECLINE = '4000000000000002';

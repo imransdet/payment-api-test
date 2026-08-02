@@ -1,4 +1,4 @@
-import { test } from './fixtures/api.fixture';
+import { test } from '../fixtures/api.fixture';
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 
 const CARD_OK = '4111111111111111';

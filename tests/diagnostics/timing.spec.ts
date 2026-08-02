@@ -1,4 +1,4 @@
-import { test } from './fixtures/api.fixture';
+import { test } from '../fixtures/api.fixture';
 import type { APIRequestContext } from '@playwright/test';
 
 const POLL_MS = 250;

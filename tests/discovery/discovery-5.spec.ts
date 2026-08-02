@@ -1,4 +1,4 @@
-import { test } from './fixtures/api.fixture';
+import { test } from '../fixtures/api.fixture';
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 
 const IBAN_OK = 'DE89370400440532013000';

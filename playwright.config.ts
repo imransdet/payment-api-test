@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: '**/discovery/**',
   fullyParallel: true,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {

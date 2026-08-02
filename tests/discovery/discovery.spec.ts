@@ -1,4 +1,4 @@
-import { test } from './fixtures/api.fixture';
+import { test } from '../fixtures/api.fixture';
 
 test('discover: full happy path', async ({ api }) => {
   // 1. Create payment method
