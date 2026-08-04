@@ -1,5 +1,6 @@
 import { test as base, expect, APIRequestContext } from '@playwright/test';
 import 'dotenv/config';
+import { withRateLimitRetry } from '../support/helpers';
 
 type ApiFixtures = {
   api: APIRequestContext;
@@ -16,7 +17,7 @@ export const test = base.extend<ApiFixtures>({
         'Content-Type': 'application/json',
       },
     });
-    await use(context);
+    await use(withRateLimitRetry(context));
     await context.dispose();
   },
 
@@ -28,7 +29,7 @@ export const test = base.extend<ApiFixtures>({
         'Content-Type': 'application/json',
       },
     });
-    await use(context);
+    await use(withRateLimitRetry(context));
     await context.dispose();
   },
 });

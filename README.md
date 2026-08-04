@@ -130,6 +130,12 @@ roughly 12 requests. Workers are capped at 4 in `playwright.config.ts` to keep
 the suite comfortably inside the limit. The limit itself is not tested, per the
 brief.
 
+The worker cap only controls concurrency within a single run — it can't see a
+second run (another PR, a re-run) sharing the same key at the same time. As a
+second layer, `api`/`unauthApi` requests retry on 429 with backoff (see
+`withRateLimitRetry` in `tests/support/helpers.ts`), honouring `Retry-After`
+when the API sends one. CI adds a third layer — see below.
+
 ### Test data
 
 Fixed and deliberately chosen, not randomly generated:
@@ -221,12 +227,34 @@ duplicate-charge protection is usually a requirement for a payment API.
 
 ---
 
+## CI
+
+`.github/workflows/tests.yml` runs the suite on every PR, on push to `main`,
+and on manual dispatch. It requires `BASE_URL` and `API_KEY` as repository
+secrets.
+
+All triggers share one `concurrency` group (`payment-api-tests`,
+`cancel-in-progress: false`), so an overlapping run — a second PR check
+firing while the first is still going — queues instead of sending concurrent
+traffic to the shared, rate-limited API. Combined with the worker cap and the
+429 retry above, that's three layers against the same failure mode: don't
+generate excess concurrency (worker cap), don't collide with other runs
+(concurrency group), and degrade gracefully if a 429 slips through anyway
+(retry with backoff).
+
+No browser install step: every test drives the API via
+`playwright.request`, never `page`, so there's no browser engine to install.
+
+The HTML report is uploaded as a build artifact (`if: always()`, so it's
+available on both passing and failing runs).
+
+---
+
 ## If I had more time
 
 - Contract testing directly against `openapi.yaml` with a schema validator, so
   the suite fails automatically when the API drifts from the spec, rather than
   relying on hand-written type definitions.
-- A CI workflow with the HTML report published as an artifact.
 - Concurrency testing around the async transition — several payments created
   against one method simultaneously while it is still processing.
 - Response-time trending, to distinguish a genuine regression from a slow day.

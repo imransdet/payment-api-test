@@ -98,7 +98,7 @@ test.describe('POST /payment-methods', () => {
       const { id } = await (await api.post('/payment-methods', { data: sepaMethod() })).json();
       const settled = await waitForSettled(api, `/payment-methods/${id}`);
 
-      console.log(`Settled sepa method: ${JSON.stringify(settled, null, 2)}`);
+      // console.log(`Settled sepa method: ${JSON.stringify(settled, null, 2)}`);
       
       expect(JSON.stringify(settled)).not.toContain(IBANS.valid);
       expect(settled.sepa).toMatchObject({

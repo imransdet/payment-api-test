@@ -1,5 +1,5 @@
 import { test, expect } from '../fixtures/data.fixture';
-import { CARDS, IBANS, CARD_TYPES, cardMethod, sepaMethod } from '../support/data';
+import { CARDS, IBANS, CARD_TYPES, cardMethod } from '../support/data';
 import {
   expectApiError,
   expectProcessingShape,
@@ -31,6 +31,8 @@ test.describe('GET /payment-methods/{id}', () => {
       test(`a ${type} method settles to active with masked card details`, async ({ api }) => {
         const created = await (await api.post('/payment-methods', { data: cardMethod(type) })).json();
         const settled = await waitForSettled(api, `/payment-methods/${created.id}`);
+
+        // console.log(`Settled ${type} method: ${JSON.stringify(settled, null, 2)}`);
 
         expect(settled).toMatchObject({
           id: created.id,

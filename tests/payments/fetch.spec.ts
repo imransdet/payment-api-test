@@ -144,6 +144,8 @@ test.describe('GET /payments/{id}', () => {
       })).json();
       const payment = await waitForSettled(api, `/payments/${created.id}`);
 
+      // console.log(`${JSON.stringify(payment, null,)}`)
+
       expect(payment.holder_name).not.toBe('');
     });
   });
@@ -172,6 +174,7 @@ test.describe('GET /payments/{id}', () => {
       test(`returns 404 for ${label}`, async ({ api }) => {
         const res = await api.get(`/payments/${id}`);
         await expectApiError(res, 404, 'not_found');
+        console.log(`Return 404 for ${label}: ${JSON.stringify(res, null, 2)}`);
       });
     }
 

@@ -11,6 +11,36 @@ import type { PaymentMethod, Payment } from '../fixtures/data.fixture';
 export const SETTLE_TIMEOUT = 15_000;
 export const POLL_INTERVAL = 500;
 
+const RATE_LIMIT_MAX_RETRIES = 4;
+const RATE_LIMIT_BASE_DELAY_MS = 500;
+
+/**
+ * Wraps an API context so `get`/`post` retry on 429 with backoff instead of
+ * failing the test. Defense-in-depth alongside the worker cap: that cap
+ * only holds if nothing else shares the rate limit budget at the same time.
+ * Any other status is returned untouched — only 429 triggers a retry, and
+ * `Retry-After` is honoured when the API sends one.
+ */
+export function withRateLimitRetry(context: APIRequestContext): APIRequestContext {
+  return new Proxy(context, {
+    get(target, prop, receiver) {
+      if (prop !== 'get' && prop !== 'post') return Reflect.get(target, prop, receiver);
+
+      const original = Reflect.get(target, prop, receiver) as (...args: unknown[]) => Promise<any>;
+      return async (...args: unknown[]) => {
+        for (let attempt = 0; ; attempt++) {
+          const res = await original.apply(target, args);
+          if (res.status() !== 429 || attempt >= RATE_LIMIT_MAX_RETRIES) return res;
+
+          const retryAfter = res.headers()['retry-after'];
+          const delay = retryAfter ? Number(retryAfter) * 1000 : RATE_LIMIT_BASE_DELAY_MS * 2 ** attempt;
+          await new Promise((r) => setTimeout(r, delay));
+        }
+      };
+    },
+  }) as APIRequestContext;
+}
+
 /** Waits for a resource to leave `processing`, then returns its body. */
 export async function waitForSettled(
   api: APIRequestContext,

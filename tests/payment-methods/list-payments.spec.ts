@@ -52,8 +52,18 @@ test.describe('GET /payment-methods/{id}/payments', () => {
     });
 
     test('does not include payments made with a different method', async ({ api, activeCardMethod, activeSepaMethod }) => {
-      await api.post('/payments', { data: paymentPayload(activeCardMethod.id, { amount: 111 }) });
-      await api.post('/payments', { data: paymentPayload(activeSepaMethod.id, { amount: 222 }) });
+      const cardPayment = await (await api.post('/payments', {
+        data: paymentPayload(activeCardMethod.id, { amount: 111 }),
+      })).json();
+
+      const sepaPayment = await (await api.post('/payments', {
+        data: paymentPayload(activeSepaMethod.id, { amount: 222 }),
+      })).json();
+
+      // The list mirrors each payment's own state, so `amount` is only present
+      // once the payment has settled out of `processing`.
+      await waitForSettled(api, `/payments/${cardPayment.id}`);
+      await waitForSettled(api, `/payments/${sepaPayment.id}`);
 
       const cardList = await (await api.get(`/payment-methods/${activeCardMethod.id}/payments`)).json();
       const sepaList = await (await api.get(`/payment-methods/${activeSepaMethod.id}/payments`)).json();
@@ -65,8 +75,12 @@ test.describe('GET /payment-methods/{id}/payments', () => {
     });
 
     test('every entry references the parent payment method', async ({ api, activeCardMethod }) => {
-      await api.post('/payments', { data: paymentPayload(activeCardMethod.id) });
-      await api.post('/payments', { data: paymentPayload(activeCardMethod.id) });
+      const ids: string[] = [];
+      for (let i = 0; i < 2; i++) {
+        const res = await api.post('/payments', { data: paymentPayload(activeCardMethod.id) });
+        ids.push((await res.json()).id);
+      }
+      for (const id of ids) await waitForSettled(api, `/payments/${id}`);
 
       const body = await (await api.get(`/payment-methods/${activeCardMethod.id}/payments`)).json();
 
