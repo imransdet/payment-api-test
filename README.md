@@ -1,3 +1,24 @@
+<!--
+PRESENTATION ORDER — cheat sheet, not rendered on GitHub / preview panes.
+
+1. Manual pass first: every endpoint in Postman before writing any test — how the
+   API actually behaves, not just the docs. Found DEFECT-2 (holder_name) here,
+   just by eyeballing responses.
+2. Strategy → "Testing strategy": docs as contract, discovery before assertion.
+3. Setup → "Project setup": boilerplate, fixtures, support utils.
+4. Structure + coverage → "Project structure" / "Coverage": suite organized one
+   spec per endpoint.
+5. DEFECT-1 (payment id) → found via automated cross-endpoint checks, not
+   visible by hand — needs comparing two responses for the same record.
+   → "Summary of findings", DEFECTS.md.
+6. Rate limit story → "Rate limiting": passed alone, failed together → traced to
+   a missing worker cap → fixed (worker cap + retry-with-backoff + CI
+   concurrency guard).
+7. Docs → TEST-PLAN.md (matrix, linked to source), DEFECTS.md (defects, linked
+   to failing tests).
+8. CI → "CI": three-layer rate-limit defense tied together.
+-->
+
 # Payment Simulation API — Test Suite
 
 Automated API test suite for the Distribusion Payment Simulation API, built with
@@ -5,6 +26,30 @@ Playwright and TypeScript.
 
 **Base URL:** `https://qa-interview-service.fly.dev`
 **Contract:** `openapi.yaml` (OAS 3.1)
+
+---
+
+## Docs
+
+- [Test Plan](TEST-PLAN.md) — full case matrix, one row per test, linked to source, automation status
+- [Defects](DEFECTS.md) — both defects, linked straight to the failing test
+
+---
+
+## Project setup
+
+| | |
+|---|---|
+| Framework | Playwright Test + TypeScript |
+| Config | `playwright.config.ts` |
+| TS config | `tsconfig.json` |
+| Env / secrets | `.env` (gitignored) + `.env.example` |
+| Fixtures | `tests/fixtures/` — auth contexts, data provisioning |
+| Shared utils | `tests/support/` — payloads, polling, assertions |
+| Structure | grouped by endpoint: `payment-methods/`, `payments/`, `e2e/` |
+| Scripts | `npm test`, `npm run test:report` |
+| CI | `.github/workflows/tests.yml` |
+| Ignore rules | `.gitignore` |
 
 ---
 

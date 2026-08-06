@@ -1,3 +1,5 @@
+[← README](README.md)
+
 # Defect Report
 
 Distribusion Payment Simulation API — findings from the automated test suite.
@@ -70,12 +72,14 @@ than a cosmetic one.
 
 ### Covering tests
 
-`tests/payment-methods/list-payments.spec.ts` → `Listed id integrity`
-`tests/e2e/payment-flow.spec.ts` → `Cross-endpoint consistency`
+**Endpoint:** `GET /payment-methods/{id}/payments`
 
-The test `listed ids are stable across repeated reads` distinguishes the two
-possible mechanisms: if it fails, the identifier is generated per response; if
-it passes, the identifier is stored but was corrupted once at write time.
+- [`the listed id matches the id returned by POST /payments`](tests/payment-methods/list-payments.spec.ts#L132)
+- [`a listed payment can be fetched by its own id`](tests/payment-methods/list-payments.spec.ts#L146)
+- [`every listed id is retrievable`](tests/payment-methods/list-payments.spec.ts#L159)
+- [`listed ids are stable across repeated reads`](tests/payment-methods/list-payments.spec.ts#L172) — distinguishes the two possible mechanisms: if it fails, the identifier is generated per response; if it passes, the identifier is stored but was corrupted once at write time
+- [`a payment listed against a method is retrievable by that id`](tests/e2e/payment-flow.spec.ts#L185)
+- [`the same payment is identical on the detail and list endpoints`](tests/e2e/payment-flow.spec.ts#L145) — covers both defects at once
 
 ---
 
@@ -142,11 +146,13 @@ passes schema validation, so nothing downstream would flag it.
 
 ### Covering tests
 
-`tests/payments/fetch.spec.ts` → `holder_name integrity`
-`tests/e2e/payment-flow.spec.ts` → `holder_name is consistent across all three endpoints`
+**Endpoint:** `GET /payments/{id}`
 
-The end-to-end test is the clearest single artifact: three assertions on the
-same field of the same record, two passing and one failing.
+- [`returns holder_name "A"/"AB"/"Bob"/"Imran"/"Imran Test" unmodified`](tests/payments/fetch.spec.ts#L110) — 5 cases, same source line (parameterised loop)
+- [`holder_name matches the payment method it was charged against`](tests/payments/fetch.spec.ts#L128)
+- [`holder_name is never empty`](tests/payments/fetch.spec.ts#L135)
+- [`holder_name is consistent across all three endpoints`](tests/e2e/payment-flow.spec.ts#L166) — the clearest single artifact: three assertions on the same field of the same record, two passing and one failing
+- [`the same payment is identical on the detail and list endpoints`](tests/e2e/payment-flow.spec.ts#L145) — covers both defects at once
 
 ---
 

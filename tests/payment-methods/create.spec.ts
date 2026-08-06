@@ -90,6 +90,7 @@ test.describe('POST /payment-methods', () => {
         brand: 'visa',
         last4: '1111',
       });
+      
       expect(settled.card).not.toHaveProperty('number');
       expect(settled.card).not.toHaveProperty('cvc');
     });

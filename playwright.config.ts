@@ -3,7 +3,7 @@ import 'dotenv/config';
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: '**/exploratory/**',
+  // testIgnore: '**/exploratory/**',
   fullyParallel: true,
   // Keeps aggregate poll + fixture-setup traffic inside the documented
   // 300 req/min limit. Without this, Playwright defaults to one worker per
