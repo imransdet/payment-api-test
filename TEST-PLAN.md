@@ -513,7 +513,13 @@ count above.
 - Malformed, empty and non-object JSON bodies
 
 ### Deliberately not tested
-- **Rate limiting.** The brief asks not to exceed it.
+- **Rate limiting as a feature.** No test deliberately exceeds 300 req/min to
+  assert the API's own 429/`Retry-After` behaviour — the brief asks not to
+  load or stress test beyond the limit. Separately, the suite *respects* the
+  limit operationally (worker cap, retry-with-backoff, CI concurrency guard —
+  see README "Rate limiting" / "CI") so its own traffic doesn't trip it by
+  accident. Not testing the limit and not tripping the limit are different
+  concerns; only the first is out of scope.
 - **Validation precedence.** When two fields are invalid, the spec does not say
   which error wins. Asserting either way would invent a contract. Each negative
   case therefore mutates a single field.

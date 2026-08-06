@@ -78,6 +78,8 @@ export function sepaBlock(overrides: Record<string, unknown> = {}) {
   };
 }
 
+// ====================================
+
 export function cardMethod(type: CardType = 'adyen', card: Record<string, unknown> = {}) {
   return { type, card: cardBlock(card) };
 }

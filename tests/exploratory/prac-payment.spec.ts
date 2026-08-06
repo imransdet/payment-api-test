@@ -40,12 +40,7 @@ test.describe('POST /payments', () => {
             }
         });
 
-    
-
-       
-
     });
-
 
 
 
